@@ -3,6 +3,7 @@
 #include "pd_api/pd_api_lua.h"
 #include "pd_api/pd_api_sprite.h"
 #include "pd_api/pd_api_sys.h"
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,8 +13,6 @@
 
 const float DIAG = SPEED * INV_SQRT2;
 
-float crankAngle = 0;
-
 static PlaydateAPI *pd = NULL;
 static const struct playdate_graphics *gfx = NULL;
 
@@ -21,6 +20,17 @@ LCDBitmap *player_gfx = NULL;
 LCDSprite *player = NULL;
 LCDBitmap *block_gfx = NULL;
 LCDSprite *block = NULL;
+
+typedef struct {
+  float startX;
+  float startY;
+  float endX;
+  float endY;
+  float angle;
+  float length;
+} Compass;
+
+Compass compass;
 
 void init_player(void) {
   const char *err = NULL;
@@ -35,6 +45,26 @@ void init_player(void) {
   pd->sprite->setCollisionsEnabled(player, 1);
   pd->sprite->setCollideRect(player, (PDRect){0, 0, 32, 32});
   pd->sprite->addSprite(player);
+}
+
+void init_comapss(void) {
+  compass.length = 15;
+  compass.startX = 300;
+  compass.startY = 200;
+  compass.endX = 300;
+  compass.endY = compass.startY - compass.length;
+  compass.angle = 0;
+}
+
+void draw_compass(void) {
+  float newAngle = pd->system->getCrankAngle();
+  if (newAngle != compass.angle) {
+    compass.angle = newAngle;
+    compass.endX = compass.startX + sinf(newAngle) * compass.length;
+    compass.endY = compass.startY - cosf(newAngle) * compass.length;
+  }
+  gfx->drawLine(compass.startX, compass.startY, compass.endX, compass.endY, 2,
+                kColorBlack);
 }
 
 void update_player(void) {
@@ -83,11 +113,7 @@ static int update(void *userdata) {
   pd->sprite->updateAndDrawSprites();
   draw_rect();
   pd->system->drawFPS(10, 10);
-  float newAngle = pd->system->getCrankAngle();
-  if (newAngle != crankAngle) {
-    crankAngle = newAngle;
-    pd->system->logToConsole("Crank Angel: %f\n", (double)crankAngle);
-  }
+  draw_compass();
   return 1; // 1 = redraw screen
 }
 
@@ -97,6 +123,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) {
     pd = playdate;
     gfx = pd->graphics;
     init_player();
+    init_comapss();
     pd->system->setUpdateCallback(update, NULL);
     break;
   case kEventUnlock:
