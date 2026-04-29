@@ -58,3 +58,5 @@ dkms.conf
 *.pdx/
 
 build/
+.cache/
+compile_commands.json
