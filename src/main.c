@@ -12,6 +12,8 @@
 
 const float DIAG = SPEED * INV_SQRT2;
 
+float crankAngle = 0;
+
 static PlaydateAPI *pd = NULL;
 static const struct playdate_graphics *gfx = NULL;
 
@@ -81,6 +83,11 @@ static int update(void *userdata) {
   pd->sprite->updateAndDrawSprites();
   draw_rect();
   pd->system->drawFPS(10, 10);
+  float newAngle = pd->system->getCrankAngle();
+  if (newAngle != crankAngle) {
+    crankAngle = newAngle;
+    pd->system->logToConsole("Crank Angel: %f\n", (double)crankAngle);
+  }
   return 1; // 1 = redraw screen
 }
 
