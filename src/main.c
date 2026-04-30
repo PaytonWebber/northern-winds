@@ -16,10 +16,17 @@ const float DIAG = SPEED * INV_SQRT2;
 static PlaydateAPI *pd = NULL;
 static const struct playdate_graphics *gfx = NULL;
 
-LCDBitmap *player_gfx = NULL;
-LCDSprite *player = NULL;
 LCDBitmap *block_gfx = NULL;
 LCDSprite *block = NULL;
+
+typedef struct {
+  float velocity;
+  float heading; // degrees
+  LCDSprite *sprite;
+  LCDBitmap *gfx;
+} Ship;
+
+Ship ship;
 
 typedef struct {
   float startX;
@@ -32,19 +39,48 @@ typedef struct {
 
 Compass compass;
 
-void init_player(void) {
+void init_ship(void) {
   const char *err = NULL;
-  player_gfx = gfx->loadBitmap("images/test1", &err);
-  if (player_gfx == NULL) {
+  ship.gfx = gfx->loadBitmap("images/test1", &err);
+  if (ship.gfx == NULL) {
     pd->system->logToConsole("loadBitmap failed: %s", err);
     return;
   }
-  player = pd->sprite->newSprite();
-  pd->sprite->setImage(player, player_gfx, kBitmapUnflipped);
-  pd->sprite->moveTo(player, 200, 100);
-  pd->sprite->setCollisionsEnabled(player, 1);
-  pd->sprite->setCollideRect(player, (PDRect){0, 0, 32, 32});
-  pd->sprite->addSprite(player);
+  ship.sprite = pd->sprite->newSprite();
+  ship.heading = 0;
+  ship.velocity = 0;
+  pd->sprite->setImage(ship.sprite, ship.gfx, kBitmapUnflipped);
+  pd->sprite->setCollisionsEnabled(ship.sprite, 1);
+  pd->sprite->setCollideRect(ship.sprite, (PDRect){0, 0, 32, 32});
+  pd->sprite->addSprite(ship.sprite);
+  pd->sprite->moveTo(ship.sprite, 220, 100);
+}
+
+void update_ship(void) {
+  PDButtons current;
+  pd->system->getButtonState(&current, NULL, NULL);
+  float dx = 0, dy = 0, ax = 0, ay = 0;
+  int len = 0;
+  if (current & kButtonUp)
+    dy -= 1.0f;
+  if (current & kButtonDown)
+    dy += 1.0f;
+  if (current & kButtonLeft)
+    dx -= 1.0f;
+  if (current & kButtonRight)
+    dx += 1.0f;
+  if (dx && dy) {
+    dx *= DIAG;
+    dy *= DIAG;
+  } else if (dx || dy) {
+    dx *= SPEED;
+    dy *= SPEED;
+  }
+  float x, y;
+  pd->sprite->getPosition(ship.sprite, &x, &y);
+  SpriteCollisionInfo *results = pd->sprite->moveWithCollisions(
+      ship.sprite, x + dx, y + dy, &ax, &ay, &len);
+  free(results);
 }
 
 void init_comapss(void) {
@@ -67,33 +103,6 @@ void draw_compass(void) {
                 kColorBlack);
 }
 
-void update_player(void) {
-  PDButtons current;
-  pd->system->getButtonState(&current, NULL, NULL);
-  float dx = 0, dy = 0, ax = 0, ay = 0;
-  int len = 0;
-  if (current & kButtonUp)
-    dy -= 1.0f;
-  if (current & kButtonDown)
-    dy += 1.0f;
-  if (current & kButtonLeft)
-    dx -= 1.0f;
-  if (current & kButtonRight)
-    dx += 1.0f;
-  if (dx && dy) {
-    dx *= DIAG;
-    dy *= DIAG;
-  } else if (dx || dy) {
-    dx *= SPEED;
-    dy *= SPEED;
-  }
-  float x, y;
-  pd->sprite->getPosition(player, &x, &y);
-  SpriteCollisionInfo *results =
-      pd->sprite->moveWithCollisions(player, x + dx, y + dy, &ax, &ay, &len);
-  free(results);
-}
-
 void draw_rect(void) {
   gfx->pushContext(block_gfx);
   {
@@ -109,7 +118,7 @@ void draw_rect(void) {
 
 static int update(void *userdata) {
   gfx->clear(kColorWhite);
-  update_player();
+  update_ship();
   pd->sprite->updateAndDrawSprites();
   draw_rect();
   pd->system->drawFPS(10, 10);
@@ -122,7 +131,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) {
   case kEventInit:
     pd = playdate;
     gfx = pd->graphics;
-    init_player();
+    init_ship();
     init_comapss();
     pd->system->setUpdateCallback(update, NULL);
     break;
