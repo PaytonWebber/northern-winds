@@ -3,52 +3,45 @@
 #include "pd_api/pd_api_lua.h"
 #include "pd_api/pd_api_sprite.h"
 #include "pd_api/pd_api_sys.h"
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define INV_SQRT2 0.70710678f
-#define SPEED 4.0f
+#define PI 3.1415926535897932384626433832f
+#define DEG2RAD (PI / 180.0f)
 
-const float DIAG = SPEED * INV_SQRT2;
-
-static PlaydateAPI *pd = NULL;
+static const PlaydateAPI *pd = NULL;
 static const struct playdate_graphics *gfx = NULL;
 
 LCDBitmap *block_gfx = NULL;
 LCDSprite *block = NULL;
 
 typedef struct {
-  float velocity;
-  float heading; // degrees
+  float x;
+  float y;
+  float speed;
+  float heading;      // degrees
+  float rudder_angle; // degrees
   LCDSprite *sprite;
   LCDBitmap *gfx;
 } Ship;
 
 Ship ship;
 
-typedef struct {
-  float startX;
-  float startY;
-  float endX;
-  float endY;
-  float angle;
-  float length;
-} Compass;
-
-Compass compass;
-
 void init_ship(void) {
   const char *err = NULL;
-  ship.gfx = gfx->loadBitmap("images/test1", &err);
+  ship.gfx =
+      gfx->loadBitmap("images/PNG/Default_size/Ships/dinghyLarge1", &err);
   if (ship.gfx == NULL) {
     pd->system->logToConsole("loadBitmap failed: %s", err);
     return;
   }
   ship.sprite = pd->sprite->newSprite();
   ship.heading = 0;
-  ship.velocity = 0;
+  ship.speed = 2;
+  ship.rudder_angle = 0;
+  ship.x = 220;
+  ship.y = 100;
   pd->sprite->setImage(ship.sprite, ship.gfx, kBitmapUnflipped);
   pd->sprite->setCollisionsEnabled(ship.sprite, 1);
   pd->sprite->setCollideRect(ship.sprite, (PDRect){0, 0, 32, 32});
@@ -56,51 +49,34 @@ void init_ship(void) {
   pd->sprite->moveTo(ship.sprite, 220, 100);
 }
 
-void update_ship(void) {
-  PDButtons current;
-  pd->system->getButtonState(&current, NULL, NULL);
-  float dx = 0, dy = 0, ax = 0, ay = 0;
-  int len = 0;
-  if (current & kButtonUp)
-    dy -= 1.0f;
-  if (current & kButtonDown)
-    dy += 1.0f;
-  if (current & kButtonLeft)
-    dx -= 1.0f;
-  if (current & kButtonRight)
-    dx += 1.0f;
-  if (dx && dy) {
-    dx *= DIAG;
-    dy *= DIAG;
-  } else if (dx || dy) {
-    dx *= SPEED;
-    dy *= SPEED;
+void update_ship_movement(void) {
+  float crank_change = pd->system->getCrankChange();
+  ship.rudder_angle += (crank_change * 0.1f);
+
+  if (ship.rudder_angle > 45.0f)
+    ship.rudder_angle = 45.0f;
+  if (ship.rudder_angle < -45.0f)
+    ship.rudder_angle = -45.0f;
+
+  ship.heading += (ship.rudder_angle * ship.speed * 0.02f);
+  while (ship.heading >= 360.0f)
+    ship.heading -= 360.0f;
+  while (ship.heading < 0.0f) {
+    ship.heading += 360.0f;
   }
-  float x, y;
-  pd->sprite->getPosition(ship.sprite, &x, &y);
+
+  float heading_rad = ship.heading * DEG2RAD;
+  float vel_x = sinf(heading_rad) * ship.speed;
+  float vel_y = -cosf(heading_rad) * ship.speed;
+  float ax, ay;
+  int len;
   SpriteCollisionInfo *results = pd->sprite->moveWithCollisions(
-      ship.sprite, x + dx, y + dy, &ax, &ay, &len);
+      ship.sprite, ship.x + vel_x, ship.y + vel_y, &ax, &ay, &len);
+  ship.x = ax;
+  ship.y = ay;
+  pd->system->logToConsole("Postion: {%f, %f}\nHeading: %f", ship.x, ship.y,
+                           ship.heading);
   free(results);
-}
-
-void init_comapss(void) {
-  compass.length = 15;
-  compass.startX = 300;
-  compass.startY = 200;
-  compass.endX = 300;
-  compass.endY = compass.startY - compass.length;
-  compass.angle = 0;
-}
-
-void draw_compass(void) {
-  float newAngle = pd->system->getCrankAngle();
-  if (newAngle != compass.angle) {
-    compass.angle = newAngle;
-    compass.endX = compass.startX + sinf(newAngle) * compass.length;
-    compass.endY = compass.startY - cosf(newAngle) * compass.length;
-  }
-  gfx->drawLine(compass.startX, compass.startY, compass.endX, compass.endY, 2,
-                kColorBlack);
 }
 
 void draw_rect(void) {
@@ -118,11 +94,10 @@ void draw_rect(void) {
 
 static int update(void *userdata) {
   gfx->clear(kColorWhite);
-  update_ship();
+  update_ship_movement();
   pd->sprite->updateAndDrawSprites();
   draw_rect();
   pd->system->drawFPS(10, 10);
-  draw_compass();
   return 1; // 1 = redraw screen
 }
 
@@ -132,7 +107,6 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) {
     pd = playdate;
     gfx = pd->graphics;
     init_ship();
-    init_comapss();
     pd->system->setUpdateCallback(update, NULL);
     break;
   case kEventUnlock:
