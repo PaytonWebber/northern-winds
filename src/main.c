@@ -38,7 +38,7 @@ void init_ship(void) {
   }
   ship.sprite = pd->sprite->newSprite();
   ship.heading = 0;
-  ship.speed = 2;
+  ship.speed = 1;
   ship.rudder_angle = 0;
   ship.x = 220;
   ship.y = 100;
@@ -74,12 +74,18 @@ void update_ship_movement(void) {
       ship.sprite, ship.x + vel_x, ship.y + vel_y, &ax, &ay, &len);
   ship.x = ax;
   ship.y = ay;
-  pd->system->logToConsole("Postion: {%f, %f}\nHeading: %f", ship.x, ship.y,
-                           ship.heading);
+  // pd->system->logToConsole("Postion: {%f, %f}\nHeading: %f", ship.x, ship.y,
+  //                          ship.heading);
   free(results);
 }
 
+void update_ship_sprite(void) {
+  gfx->drawRotatedBitmap(ship.gfx, (int)ship.x, (int)ship.y, ship.heading, 0.5f,
+                         0.5f, 1.0f, 1.0f);
+}
+
 void draw_rect(void) {
+  block_gfx = gfx->newBitmap(32, 32, kColorWhite);
   gfx->pushContext(block_gfx);
   {
     gfx->drawRect(0, 0, 32, 32, kColorBlack);
@@ -95,8 +101,8 @@ void draw_rect(void) {
 static int update(void *userdata) {
   gfx->clear(kColorWhite);
   update_ship_movement();
-  pd->sprite->updateAndDrawSprites();
-  draw_rect();
+  update_ship_sprite();
+  // pd->sprite->updateAndDrawSprites();
   pd->system->drawFPS(10, 10);
   return 1; // 1 = redraw screen
 }
@@ -107,6 +113,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) {
     pd = playdate;
     gfx = pd->graphics;
     init_ship();
+    draw_rect();
     pd->system->setUpdateCallback(update, NULL);
     break;
   case kEventUnlock:
