@@ -5,7 +5,6 @@
 #include "pd_api/pd_api_sys.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define PI 3.1415926535897932384626433832f
 #define DEG2RAD (PI / 180.0f)
@@ -28,6 +27,11 @@ typedef struct {
 
 Ship ship;
 
+void draw_ship_callback(LCDSprite *sprite, PDRect bounds, PDRect drawrect) {
+  gfx->drawRotatedBitmap(ship.gfx, (int)ship.x, (int)ship.y, ship.heading, 0.5f,
+                         0.5f, 1.0f, 1.0f);
+}
+
 void init_ship(void) {
   const char *err = NULL;
   ship.gfx =
@@ -43,10 +47,13 @@ void init_ship(void) {
   ship.x = 220;
   ship.y = 100;
   pd->sprite->setImage(ship.sprite, ship.gfx, kBitmapUnflipped);
+  pd->sprite->setDrawFunction(ship.sprite, draw_ship_callback);
+  pd->sprite->setBounds(ship.sprite, (PDRect){0, 0, 48, 48});
+  pd->sprite->setZIndex(ship.sprite, 10);
   pd->sprite->setCollisionsEnabled(ship.sprite, 1);
-  pd->sprite->setCollideRect(ship.sprite, (PDRect){0, 0, 32, 32});
+  pd->sprite->setCollideRect(ship.sprite, (PDRect){8, 8, 32, 32});
   pd->sprite->addSprite(ship.sprite);
-  pd->sprite->moveTo(ship.sprite, 220, 100);
+  pd->sprite->moveTo(ship.sprite, ship.x, ship.y);
 }
 
 void update_ship_movement(void) {
@@ -76,15 +83,10 @@ void update_ship_movement(void) {
   ship.y = ay;
   // pd->system->logToConsole("Postion: {%f, %f}\nHeading: %f", ship.x, ship.y,
   //                          ship.heading);
-  free(results);
+  pd->system->realloc(results, 0);
 }
 
-void update_ship_sprite(void) {
-  gfx->drawRotatedBitmap(ship.gfx, (int)ship.x, (int)ship.y, ship.heading, 0.5f,
-                         0.5f, 1.0f, 1.0f);
-}
-
-void draw_rect(void) {
+void draw_island(void) {
   block_gfx = gfx->newBitmap(32, 32, kColorWhite);
   gfx->pushContext(block_gfx);
   {
@@ -93,16 +95,25 @@ void draw_rect(void) {
   gfx->popContext();
   block = pd->sprite->newSprite();
   pd->sprite->setImage(block, block_gfx, kBitmapUnflipped);
+  pd->sprite->setBounds(block, (PDRect){100, 100, 32, 32});
   pd->sprite->setCollideRect(block, (PDRect){0, 0, 32, 32});
   pd->sprite->setCollisionsEnabled(block, 1);
   pd->sprite->addSprite(block);
 }
 
+void fire_cannon(void) {}
+
 static int update(void *userdata) {
-  gfx->clear(kColorWhite);
+  PDButtons current, pushed, released;
+  pd->system->getButtonState(&current, &pushed, &released);
+  if (pushed & kButtonB) {
+    fire_cannon();
+  }
+
   update_ship_movement();
-  update_ship_sprite();
-  // pd->sprite->updateAndDrawSprites();
+
+  gfx->clear(kColorWhite);
+  pd->sprite->updateAndDrawSprites();
   pd->system->drawFPS(10, 10);
   return 1; // 1 = redraw screen
 }
@@ -113,7 +124,7 @@ int eventHandler(PlaydateAPI *playdate, PDSystemEvent event, uint32_t arg) {
     pd = playdate;
     gfx = pd->graphics;
     init_ship();
-    draw_rect();
+    draw_island();
     pd->system->setUpdateCallback(update, NULL);
     break;
   case kEventUnlock:
