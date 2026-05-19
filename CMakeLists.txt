@@ -37,12 +37,20 @@ set(PLAYDATE_GAME_DEVICE northern-winds_DEVICE)
 
 project(${PLAYDATE_GAME_NAME} C ASM)
 
-file(GLOB SRC_FILES src/*.c)
+file(GLOB_RECURSE SRC_FILES CONFIGURE_DEPENDS src/*.c)
 
 if (TOOLCHAIN STREQUAL "armgcc")
     add_executable(${PLAYDATE_GAME_DEVICE} ${SRC_FILES})
+    set(GAME_TARGET ${PLAYDATE_GAME_DEVICE})
 else()
     add_library(${PLAYDATE_GAME_NAME} SHARED ${SRC_FILES})
+    set(GAME_TARGET ${PLAYDATE_GAME_NAME})
 endif()
+
+target_compile_options(${GAME_TARGET} PRIVATE
+    -Wall
+    -Wextra
+    -Wmissing-field-initializers
+)
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)
