@@ -1,9 +1,11 @@
 #include "ecs.h"
+#include "entities/ship.h"
 #include "game_state.h"
 #include "pd_api.h"
 #include "pd_api/pd_api_gfx.h"
 #include "pd_api/pd_api_sprite.h"
 #include "pd_api/pd_api_sys.h"
+#include "systems/ship_movement.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -19,7 +21,7 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg) {
     switch (event) {
         case kEventInit:
             set_playdate_api(playdate);
-            ecs.init_ecs();
+            ecs_init();
             init_ship(220, 110, "images/PNG/Default_size/Ships/dinghyLarge1");
             game_state.pd->system->setUpdateCallback(update, NULL);
             break;

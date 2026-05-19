@@ -1,18 +1,19 @@
 #include "ship.h"
 #include "../ecs.h"
 #include "../game_state.h"
+#include "../systems/render.h"
 
 int init_ship(float x, float y, const char* bitmap) {
-    int            id = ecs.create_entity();
-    c_transform_t* t  = ecs.add_transform(id);
+    int            id = ecs_create_entity();
+    c_transform_t* t  = ecs_add_transform(id);
     t->x              = x;
     t->y              = y;
     t->heading_deg    = 0;
 
-    c_ship_physics_t* sp = ecs.add_ship_physics(id);
+    c_ship_physics_t* sp = ecs_add_ship_physics(id);
     sp->rudder_deg       = 0;
 
-    c_sprite_t* s   = ecs.add_sprite(id);
+    c_sprite_t* s   = ecs_add_sprite(id);
     const char* err = NULL;
     s->gfx          = game_state.pd->graphics->loadBitmap(bitmap, &err);
     if (s->gfx == NULL) {

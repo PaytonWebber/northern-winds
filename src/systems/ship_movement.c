@@ -6,10 +6,10 @@
 
 void update_ship_movement(void) {
     const uint8_t     required_mask = COMP_TRANSFORM | COMP_SHIP_PHYSICS | COMP_SPRITE;
-    const uint8_t*    entity_masks  = ecs.get_masks_array();
-    c_transform_t*    transforms    = ecs.get_transforms_array();
-    c_ship_physics_t* ship_physics  = ecs.get_ship_physics_array();
-    c_sprite_t*       sprites       = ecs.get_sprites_array();
+    const uint8_t*    entity_masks  = ecs_get_masks_array();
+    c_transform_t*    transforms    = ecs_get_transforms_array();
+    c_ship_physics_t* ship_physics  = ecs_get_ship_physics_array();
+    c_sprite_t*       sprites       = ecs_get_sprites_array();
 
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if ((entity_masks[i] & required_mask) != required_mask)
