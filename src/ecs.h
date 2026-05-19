@@ -2,6 +2,7 @@
 #include "components/ship_physics.h"
 #include "components/sprite.h"
 #include "components/transform.h"
+#include "entities/ship.h"
 #include "systems/render.h"
 #include "systems/ship_movement.h"
 #include <stdint.h>
