@@ -10,8 +10,8 @@ int init_ship(float x, float y, const char* bitmap) {
     t->y              = y;
     t->heading_deg    = 0;
 
-    c_ship_physics_t* sp = ecs_add_ship_physics(id);
-    sp->rudder_deg       = 0;
+    c_ship_input_t* si    = ecs_add_ship_input(id);
+    si->rudder_target_deg = 0;
 
     c_sprite_t* s   = ecs_add_sprite(id);
     const char* err = NULL;

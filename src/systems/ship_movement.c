@@ -9,23 +9,17 @@ static const float S_CRUISE_SPEED = 30.0f;
 static const float S_TURN_RATE    = 1.2f;
 
 void update_ship_movement(float dt) {
-    const uint8_t     required_mask = COMP_TRANSFORM | COMP_SHIP_PHYSICS | COMP_SPRITE;
-    const uint8_t*    entity_masks  = ecs_get_masks_array();
-    c_transform_t*    transforms    = ecs_get_transforms_array();
-    c_ship_physics_t* ship_physics  = ecs_get_ship_physics_array();
-    c_sprite_t*       sprites       = ecs_get_sprites_array();
+    const uint8_t         required_mask = COMP_TRANSFORM | COMP_SHIP_INPUT | COMP_SPRITE;
+    const uint8_t*        entity_masks  = ecs_get_masks_array();
+    const c_ship_input_t* ship_input    = ecs_get_ship_inputs_array();
+    c_transform_t*        transforms    = ecs_get_transforms_array();
+    c_sprite_t*           sprites       = ecs_get_sprites_array();
 
     for (int i = 0; i < MAX_ENTITIES; i++) {
         if ((entity_masks[i] & required_mask) != required_mask)
             continue;
 
-        ship_physics[i].rudder_deg += game_state.pd->system->getCrankChange() * 0.1f;
-        if (ship_physics[i].rudder_deg > 45.0f)
-            ship_physics[i].rudder_deg = 45.0f;
-        if (ship_physics[i].rudder_deg < -45.0f)
-            ship_physics[i].rudder_deg = -45.0f;
-
-        transforms[i].heading_deg += (ship_physics[i].rudder_deg * S_TURN_RATE * dt);
+        transforms[i].heading_deg += (ship_input[i].rudder_target_deg * S_TURN_RATE * dt);
         while (transforms[i].heading_deg >= 360.0f)
             transforms[i].heading_deg -= 360.0f;
         while (transforms[i].heading_deg < 0.0f)
