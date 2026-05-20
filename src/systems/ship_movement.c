@@ -1,8 +1,12 @@
 #include "ship_movement.h"
+#include "../core/math.h"
 #include "../ecs.h"
 #include "../game_state.h"
 #include <math.h>
 #include <stdint.h>
+
+static const float S_CRUISE_SPEED = 30.0f;
+static const float S_TURN_RATE    = 1.2f;
 
 void update_ship_movement(float dt) {
     const uint8_t     required_mask = COMP_TRANSFORM | COMP_SHIP_PHYSICS | COMP_SPRITE;
@@ -21,20 +25,25 @@ void update_ship_movement(float dt) {
         if (ship_physics[i].rudder_deg < -45.0f)
             ship_physics[i].rudder_deg = -45.0f;
 
-        transforms[i].heading_deg += (ship_physics[i].rudder_deg * TURN_RATE * dt);
+        transforms[i].heading_deg += (ship_physics[i].rudder_deg * S_TURN_RATE * dt);
         while (transforms[i].heading_deg >= 360.0f)
             transforms[i].heading_deg -= 360.0f;
         while (transforms[i].heading_deg < 0.0f)
             transforms[i].heading_deg += 360.0f;
 
         float heading_rad = transforms[i].heading_deg * DEG2RAD;
-        float x_vel       = sinf(heading_rad) * CRUISE_SPEED * dt;
-        float y_vel       = -cosf(heading_rad) * CRUISE_SPEED * dt;
+        float vx          = sinf(heading_rad) * S_CRUISE_SPEED;
+        float vy          = -cosf(heading_rad) * S_CRUISE_SPEED;
 
         float                ax, ay;
         int                  len;
-        SpriteCollisionInfo* results = game_state.pd->sprite->moveWithCollisions(
-            sprites[i].sprite, transforms[i].x + x_vel, transforms[i].y + y_vel, &ax, &ay, &len);
+        SpriteCollisionInfo* results =
+            game_state.pd->sprite->moveWithCollisions(sprites[i].sprite,
+                                                      transforms[i].x + vx * dt,
+                                                      transforms[i].y + vy * dt,
+                                                      &ax,
+                                                      &ay,
+                                                      &len);
 
         transforms[i].x = ax;
         transforms[i].y = ay;
