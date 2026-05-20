@@ -10,7 +10,9 @@
 #include <stdio.h>
 
 static int update(void* userdata) {
-    update_ship_movement();
+    const float dt = game_state.pd->system->getElapsedTime();
+    game_state.pd->system->resetElapsedTime();
+    update_ship_movement(dt);
     game_state.pd->graphics->clear(kColorWhite);
     game_state.pd->sprite->updateAndDrawSprites();
     game_state.pd->system->drawFPS(10, 10);

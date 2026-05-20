@@ -4,7 +4,7 @@
 #include <math.h>
 #include <stdint.h>
 
-void update_ship_movement(void) {
+void update_ship_movement(float dt) {
     const uint8_t     required_mask = COMP_TRANSFORM | COMP_SHIP_PHYSICS | COMP_SPRITE;
     const uint8_t*    entity_masks  = ecs_get_masks_array();
     c_transform_t*    transforms    = ecs_get_transforms_array();
@@ -21,16 +21,15 @@ void update_ship_movement(void) {
         if (ship_physics[i].rudder_deg < -45.0f)
             ship_physics[i].rudder_deg = -45.0f;
 
-        float ship_speed = 2.0;
-        transforms[i].heading_deg += (ship_physics[i].rudder_deg * ship_speed * 0.02f);
+        transforms[i].heading_deg += (ship_physics[i].rudder_deg * TURN_RATE * dt);
         while (transforms[i].heading_deg >= 360.0f)
             transforms[i].heading_deg -= 360.0f;
         while (transforms[i].heading_deg < 0.0f)
             transforms[i].heading_deg += 360.0f;
 
         float heading_rad = transforms[i].heading_deg * DEG2RAD;
-        float x_vel       = sinf(heading_rad) * ship_speed;
-        float y_vel       = -cosf(heading_rad) * ship_speed;
+        float x_vel       = sinf(heading_rad) * CRUISE_SPEED * dt;
+        float y_vel       = -cosf(heading_rad) * CRUISE_SPEED * dt;
 
         float                ax, ay;
         int                  len;
