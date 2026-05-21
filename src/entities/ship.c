@@ -1,7 +1,6 @@
 #include "ship.h"
 #include "../ecs.h"
 #include "../game_state.h"
-#include "../systems/render.h"
 
 int init_ship(float x, float y, const char* bitmap) {
     int            id = ecs_create_entity();
@@ -21,11 +20,7 @@ int init_ship(float x, float y, const char* bitmap) {
         return -1;
     }
     s->sprite = game_state.pd->sprite->newSprite();
-    game_state.pd->sprite->setUserdata(s->sprite, s);
-    game_state.pd->sprite->setImage(s->sprite, s->gfx, kBitmapUnflipped);
-    game_state.pd->sprite->setDrawFunction(s->sprite, draw_ship_callback);
     game_state.pd->sprite->setBounds(s->sprite, (PDRect) {0, 0, 48, 48});
-    game_state.pd->sprite->setZIndex(s->sprite, 10);
     game_state.pd->sprite->setCollisionsEnabled(s->sprite, 1);
     game_state.pd->sprite->setCollideRect(s->sprite, (PDRect) {8, 8, 32, 32});
     game_state.pd->sprite->addSprite(s->sprite);
