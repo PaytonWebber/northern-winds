@@ -5,6 +5,7 @@
 #include "pd_api/pd_api_gfx.h"
 #include "pd_api/pd_api_sprite.h"
 #include "pd_api/pd_api_sys.h"
+#include "systems/background_render.h"
 #include "systems/camera.h"
 #include "systems/ship_input.h"
 #include "systems/ship_movement.h"
@@ -20,6 +21,7 @@ static int update(void* userdata) {
     camera_update_follow(dt);
     game_state.pd->graphics->clear(kColorWhite);
     game_state.pd->sprite->updateAndDrawSprites();
+    draw_ocean_background();
     update_sprite_render();
     game_state.pd->system->drawFPS(10, 10);
     return 1; // 1 = redraw screen

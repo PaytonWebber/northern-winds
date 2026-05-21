@@ -14,6 +14,11 @@ typedef struct {
 
 static camera_t camera = {.x = 0, .y = 0, .target_entity = -1};
 
+void camera_get_position(float* cx, float* cy) {
+    *cx = camera.x;
+    *cy = camera.y;
+}
+
 void camera_set_follow(int id) {
     if (id >= MAX_ENTITIES || id < 0)
         return;
