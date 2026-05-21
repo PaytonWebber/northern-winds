@@ -43,3 +43,9 @@ void camera_world_to_screen(float wx, float wy, int* sx, int* sy) {
     *sx = (int) floorf(wx - camera.x + SCREEN_WIDTH * 0.5f);
     *sy = (int) floorf(wy - camera.y + SCREEN_HEIGHT * 0.5f);
 }
+
+void camera_apply_offset(void) {
+    int ox = (int) (SCREEN_WIDTH * 0.5f) - (int) floorf(camera.x);
+    int oy = (int) (SCREEN_HEIGHT * 0.5f) - (int) floorf(camera.y);
+    game_state.pd->graphics->setDrawOffset(ox, oy);
+}

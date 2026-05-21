@@ -19,6 +19,7 @@ static int update(void* userdata) {
     update_ship_input();
     update_ship_movement(dt);
     camera_update_follow(dt);
+    camera_apply_offset();
     game_state.pd->graphics->clear(kColorWhite);
     game_state.pd->sprite->updateAndDrawSprites();
     draw_ocean_background();

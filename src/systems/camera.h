@@ -7,3 +7,4 @@ void camera_get_position(float* cx, float* cy);
 void camera_set_follow(int entity_id);
 void camera_update_follow(float dt);
 void camera_world_to_screen(float wx, float wy, int* sx, int* sy);
+void camera_apply_offset(void);
