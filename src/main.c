@@ -19,11 +19,15 @@ static int update(void* userdata) {
     update_ship_input();
     update_ship_movement(dt);
     camera_update_follow(dt);
-    camera_apply_offset();
+
+    camera_apply_draw_offset();
     game_state.pd->graphics->clear(kColorWhite);
     game_state.pd->sprite->updateAndDrawSprites();
-    draw_ocean_background();
+
+    game_state.pd->graphics->setDrawOffset(0, 0);
+    update_background_render();
     update_sprite_render();
+
     game_state.pd->system->drawFPS(10, 10);
     return 1; // 1 = redraw screen
 }

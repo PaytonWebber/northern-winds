@@ -1,3 +1,3 @@
 #pragma once
 
-void draw_ocean_background(void);
+void update_background_render(void);
