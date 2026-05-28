@@ -1,9 +1,9 @@
 #pragma once
 #include "pd_api.h"
-#include "pd_api/pd_api_gfx.h"
 
 typedef struct {
     PlaydateAPI* pd;
+    int          frame_counter;
 } game_state_t;
 
 extern game_state_t game_state;

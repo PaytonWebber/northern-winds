@@ -8,6 +8,7 @@
 #include "pd_api/pd_api_sys.h"
 #include "systems/background_render.h"
 #include "systems/camera.h"
+#include "systems/particles.h"
 #include "systems/ship_input.h"
 #include "systems/ship_movement.h"
 #include "systems/sprite_render.h"
@@ -19,6 +20,7 @@ static int update(void* userdata) {
     game_state.pd->system->resetElapsedTime();
     update_ship_input();
     update_ship_movement(dt);
+    particles_update(dt);
     camera_update_follow(dt);
 
     camera_apply_draw_offset();
@@ -27,9 +29,11 @@ static int update(void* userdata) {
 
     game_state.pd->graphics->setDrawOffset(0, 0);
     update_background_render();
+    particles_draw();
     update_sprite_render();
 
     game_state.pd->system->drawFPS(10, 10);
+    game_state.frame_counter++;
     return 1; // 1 = redraw screen
 }
 
