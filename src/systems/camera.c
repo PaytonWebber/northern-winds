@@ -7,16 +7,17 @@
 static const float S_FOLLOW_RATE = 2.0f;
 
 typedef struct {
-    float x;
-    float y;
-    int   target_entity; // -1 for no follow
+    vec2_t pos;
+    int    target_entity; // -1 for no follow
 } camera_t;
 
-static camera_t camera = {.x = 0, .y = 0, .target_entity = -1};
+static camera_t camera = {
+    (vec2_t) {.x = 0, .y = 0},
+     .target_entity = -1
+};
 
-void camera_get_position(float* cx, float* cy) {
-    *cx = camera.x;
-    *cy = camera.y;
+vec2_t camera_get_position(void) {
+    return camera.pos;
 }
 
 void camera_set_follow(int id) {
@@ -25,8 +26,7 @@ void camera_set_follow(int id) {
     camera.target_entity = id;
 
     const c_transform_t* t = ecs_get_transform_const(id);
-    camera.x               = t->x;
-    camera.y               = t->y;
+    camera.pos             = t->pos;
 }
 
 void camera_update_follow(float dt) {
@@ -34,18 +34,17 @@ void camera_update_follow(float dt) {
         return;
     const c_transform_t* t = ecs_get_transform_const(camera.target_entity);
 
-    float k = 1.0f - expf(-S_FOLLOW_RATE * dt);
-    camera.x += (t->x - camera.x) * k;
-    camera.y += (t->y - camera.y) * k;
+    float k    = 1.0f - expf(-S_FOLLOW_RATE * dt);
+    camera.pos = vec2_add(camera.pos, vec2_scale(vec2_sub(t->pos, camera.pos), k));
 }
 
-void camera_world_to_screen(float wx, float wy, int* sx, int* sy) {
-    *sx = (int) floorf(wx - camera.x + SCREEN_WIDTH * 0.5f);
-    *sy = (int) floorf(wy - camera.y + SCREEN_HEIGHT * 0.5f);
+void camera_world_to_screen(vec2_t world_pos, int* sx, int* sy) {
+    *sx = (int) floorf(world_pos.x - camera.pos.x + SCREEN_WIDTH * 0.5f);
+    *sy = (int) floorf(world_pos.y - camera.pos.y + SCREEN_HEIGHT * 0.5f);
 }
 
 void camera_apply_draw_offset(void) {
-    int ox = (int) (SCREEN_WIDTH * 0.5f) - (int) floorf(camera.x);
-    int oy = (int) (SCREEN_HEIGHT * 0.5f) - (int) floorf(camera.y);
+    int ox = (int) (SCREEN_WIDTH * 0.5f) - (int) floorf(camera.pos.x);
+    int oy = (int) (SCREEN_HEIGHT * 0.5f) - (int) floorf(camera.pos.y);
     game_state.pd->graphics->setDrawOffset(ox, oy);
 }

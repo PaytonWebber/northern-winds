@@ -16,7 +16,7 @@ void update_sprite_render(void) {
             continue;
 
         int sx, sy;
-        camera_world_to_screen(transforms[i].x, transforms[i].y, &sx, &sy);
+        camera_world_to_screen(transforms[i].pos, &sx, &sy);
 
         game_state.pd->graphics->drawRotatedBitmap(
             sprites[i].gfx, sx, sy, transforms[i].heading_deg, 0.5f, 0.5f, 1.0f, 1.0f);

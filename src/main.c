@@ -1,3 +1,4 @@
+#include "core/math.h"
 #include "ecs.h"
 #include "entities/ship.h"
 #include "game_state.h"
@@ -37,7 +38,8 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg) {
         case kEventInit: {
             set_playdate_api(playdate);
             ecs_init();
-            int player_id = init_ship(220, 110, "images/PNG/Default_size/Ships/dinghyLarge1");
+            int player_id = init_ship((vec2_t) {.x = 220, .y = 100},
+                                      "images/PNG/Default_size/Ships/dinghyLarge1");
             ecs_add_player_controlled(player_id);
             camera_set_follow(player_id);
             game_state.pd->system->setUpdateCallback(update, NULL);

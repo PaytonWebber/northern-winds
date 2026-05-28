@@ -25,22 +25,21 @@ void update_ship_movement(float dt) {
         while (transforms[i].heading_deg < 0.0f)
             transforms[i].heading_deg += 360.0f;
 
-        float heading_rad = transforms[i].heading_deg * DEG2RAD;
-        float vx          = sinf(heading_rad) * S_CRUISE_SPEED;
-        float vy          = -cosf(heading_rad) * S_CRUISE_SPEED;
+        const float  heading_rad = transforms[i].heading_deg * DEG2RAD;
+        const vec2_t forward     = dir_from_angle(heading_rad);
+        const vec2_t velocity    = vec2_scale(forward, S_CRUISE_SPEED);
 
         float                ax, ay;
         int                  len;
         SpriteCollisionInfo* results =
             game_state.pd->sprite->moveWithCollisions(sprites[i].sprite,
-                                                      transforms[i].x + vx * dt,
-                                                      transforms[i].y + vy * dt,
+                                                      transforms[i].pos.x + velocity.x * dt,
+                                                      transforms[i].pos.y + velocity.y * dt,
                                                       &ax,
                                                       &ay,
                                                       &len);
 
-        transforms[i].x = ax;
-        transforms[i].y = ay;
+        transforms[i].pos = (vec2_t) {.x = ax, .y = ay};
         game_state.pd->system->realloc(results, 0);
     }
 }

@@ -1,4 +1,4 @@
 #pragma once
-#include "pd_api.h"
+#include "../core/math.h"
 
-int init_ship(float x, float y, const char* bitmap);
+int init_ship(vec2_t pos, const char* bitmap);
