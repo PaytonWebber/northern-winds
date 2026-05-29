@@ -26,7 +26,7 @@ static inline vec2_t vec2_sub(vec2_t a, vec2_t b) {
 }
 
 static inline float rand_unit(void) {
-    return (float) rand() / RAND_MAX; // [0, 1]
+    return (float) rand() / (float) RAND_MAX; // [0, 1]
 }
 
 static inline float rand_signed(void) {

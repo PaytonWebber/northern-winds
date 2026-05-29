@@ -95,6 +95,7 @@ void update_ship_movement(float dt) {
         const float  heading_rad = transforms[i].heading_deg * DEG2RAD;
         const vec2_t forward     = dir_from_angle(heading_rad);
         const vec2_t velocity    = vec2_scale(forward, S_CRUISE_SPEED);
+        transforms[i].vel        = velocity;
 
         float                ax, ay;
         int                  len;

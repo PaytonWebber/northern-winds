@@ -17,7 +17,7 @@ static int            s_free_top = -1;
 void ecs_init(void) {
     s_free_top = -1;
     for (int i = MAX_ENTITIES - 1; i >= 0; i--) {
-        s_free_stack[++s_free_top] = i;
+        s_free_stack[++s_free_top] = (uint8_t) i;
         s_entity_masks[i]          = COMP_NONE;
     }
 }
@@ -30,7 +30,7 @@ int ecs_create_entity(void) {
 
 void ecs_destroy_entity(int id) {
     s_entity_masks[id]         = COMP_NONE;
-    s_free_stack[++s_free_top] = id;
+    s_free_stack[++s_free_top] = (uint8_t) id;
 }
 
 c_transform_t* ecs_add_transform(int id) {

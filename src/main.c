@@ -8,7 +8,9 @@
 #include "pd_api/pd_api_sys.h"
 #include "systems/background_render.h"
 #include "systems/camera.h"
+#include "systems/cannonballs.h"
 #include "systems/particles.h"
+#include "systems/ship_cannons.h"
 #include "systems/ship_input.h"
 #include "systems/ship_movement.h"
 #include "systems/sprite_render.h"
@@ -16,10 +18,13 @@
 #include <stdio.h>
 
 static int update(void* userdata) {
+    (void) userdata;
     const float dt = game_state.pd->system->getElapsedTime();
     game_state.pd->system->resetElapsedTime();
     update_ship_input();
     update_ship_movement(dt);
+    update_ship_cannons(dt);
+    cannonballs_update(dt);
     particles_update(dt);
     camera_update_follow(dt);
 
@@ -29,6 +34,7 @@ static int update(void* userdata) {
 
     game_state.pd->graphics->setDrawOffset(0, 0);
     update_background_render();
+    cannonballs_draw();
     particles_draw();
     update_sprite_render();
 
@@ -38,6 +44,7 @@ static int update(void* userdata) {
 }
 
 int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg) {
+    (void) arg;
     switch (event) {
         case kEventInit: {
             set_playdate_api(playdate);

@@ -51,6 +51,15 @@ target_compile_options(${GAME_TARGET} PRIVATE
     -Wall
     -Wextra
     -Wmissing-field-initializers
+    -Werror=implicit-function-declaration
+    -Wstrict-prototypes
+    -Wmissing-prototypes
+    -Wdouble-promotion
+    -Wformat=2
+    -Wshadow
+    -Wconversion
 )
+
+target_include_directories(${GAME_TARGET} SYSTEM PRIVATE ${SDK}/C_API)
 
 include(${SDK}/C_API/buildsupport/playdate_game.cmake)

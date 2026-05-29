@@ -3,6 +3,12 @@
 #include "camera.h"
 #include "pd_api/pd_api_gfx.h"
 
+typedef struct {
+    vec2_t pos;
+    vec2_t vel;
+    float  life_remaining;
+} particle_t;
+
 static particle_t       s_particles[MAX_PARTICLES];
 static int              s_active_count   = 0;
 static const float      S_WATER_FRICTION = 0.95f;
@@ -54,7 +60,7 @@ void particles_draw(void) {
         const foam_style_t style = pick_foam_style(s_particles[i].life_remaining);
         int                sx, sy;
         camera_world_to_screen(s_particles[i].pos, &sx, &sy);
-        if (sx >= 0 && sx < SCREEN_WIDTH && sy >= 0 && sy < SCREEN_HEIGHT) {
+        if (sx >= 0 && (float) sx < SCREEN_WIDTH && sy >= 0 && (float) sy < SCREEN_HEIGHT) {
             game_state.pd->graphics->fillRect(sx, sy, style.size, style.size, style.color);
         }
     }

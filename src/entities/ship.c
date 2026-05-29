@@ -3,16 +3,16 @@
 #include "../game_state.h"
 
 int init_ship(vec2_t pos, const char* bitmap) {
-    int            id   = ecs_create_entity();
-    c_transform_t* t    = ecs_add_transform(id);
-    t->pos              = pos;
-    t->heading_deg      = 0;
-    t->wake_accumulator = 0;
+    int            id = ecs_create_entity();
+    c_transform_t* t  = ecs_add_transform(id);
+    *t                = (c_transform_t) {0};
+    t->pos            = pos;
 
-    c_ship_input_t* si    = ecs_add_ship_input(id);
-    si->rudder_target_deg = 0;
+    c_ship_input_t* si = ecs_add_ship_input(id);
+    *si                = (c_ship_input_t) {0};
 
     c_sprite_t* s   = ecs_add_sprite(id);
+    *s              = (c_sprite_t) {0};
     const char* err = NULL;
     s->gfx          = game_state.pd->graphics->loadBitmap(bitmap, &err);
     if (s->gfx == NULL) {
