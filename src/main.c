@@ -53,6 +53,9 @@ int eventHandler(PlaydateAPI* playdate, PDSystemEvent event, uint32_t arg) {
                                       "images/PNG/Default_size/Ships/dinghyLarge1");
             ecs_add_player_controlled(player_id);
             camera_set_follow(player_id);
+            int enemy_id = init_ship((vec2_t) {.x = 320, .y = 100},
+                                     "images/PNG/Default_size/Ships/dinghyLarge1");
+            ecs_add_ai_controlled(enemy_id);
             game_state.pd->system->setUpdateCallback(update, NULL);
             break;
         }

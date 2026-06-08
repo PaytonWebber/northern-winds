@@ -11,6 +11,7 @@
 #define COMP_SPRITE            (1 << 1)
 #define COMP_SHIP_INPUT        (1 << 2)
 #define COMP_PLAYER_CONTROLLED (1 << 3)
+#define COMP_AI_CONTROLLED     (1 << 4)
 
 void ecs_init(void);
 int  ecs_create_entity(void);
@@ -20,6 +21,7 @@ c_transform_t*  ecs_add_transform(int entity_id);
 c_sprite_t*     ecs_add_sprite(int entity_id);
 c_ship_input_t* ecs_add_ship_input(int entity_id);
 void            ecs_add_player_controlled(int entity_id);
+void            ecs_add_ai_controlled(int entity_id);
 
 const c_transform_t*  ecs_get_transform_const(int entity_id);
 const c_sprite_t*     ecs_get_sprite_const(int entity_id);

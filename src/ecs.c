@@ -51,6 +51,11 @@ void ecs_add_player_controlled(int id) {
     s_entity_masks[id] |= COMP_PLAYER_CONTROLLED;
 };
 
+void ecs_add_ai_controlled(int id) {
+    // assert id < MAX_ENTITIES
+    s_entity_masks[id] |= COMP_AI_CONTROLLED;
+};
+
 c_ship_input_t* ecs_add_ship_input(int id) {
     // assert id < MAX_ENTITIES
     s_entity_masks[id] |= COMP_SHIP_INPUT;

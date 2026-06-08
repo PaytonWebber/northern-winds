@@ -6,6 +6,7 @@
 
 static const float S_RUDDER_SENSITIVITY = 0.1f; // deg of target per deg of crank
 
+// TODO: break this up into 'player' controlled and 'ai' controlled helper functions.
 void update_ship_input(void) {
     const uint8_t   required_mask = COMP_SHIP_INPUT | COMP_PLAYER_CONTROLLED;
     const uint8_t*  entity_masks  = ecs_get_masks_array();
