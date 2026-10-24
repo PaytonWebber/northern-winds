@@ -2,12 +2,14 @@
 #include <assert.h>
 #include <stdint.h>
 
-static uint8_t        s_entity_masks[MAX_ENTITIES];
-static c_transform_t  s_transforms[MAX_ENTITIES];
-static c_sprite_t     s_sprites[MAX_ENTITIES];
-static c_ship_input_t s_ship_inputs[MAX_ENTITIES];
-static uint8_t        s_free_stack[MAX_ENTITIES];
-static int            s_free_top = -1;
+static uint8_t         s_entity_masks[MAX_ENTITIES];
+static c_transform_t   s_transforms[MAX_ENTITIES];
+static c_sprite_t      s_sprites[MAX_ENTITIES];
+static c_sail_t        s_sails[MAX_ENTITIES];
+static c_ship_motion_t s_ship_motions[MAX_ENTITIES];
+static c_ship_input_t  s_ship_inputs[MAX_ENTITIES];
+static uint8_t         s_free_stack[MAX_ENTITIES];
+static int             s_free_top = -1;
 
 /*
    Initializes the arrays, so s_free_stack will contain indices
@@ -46,6 +48,18 @@ c_sprite_t* ecs_add_sprite(int id) {
     return &s_sprites[id];
 }
 
+c_sail_t* ecs_add_sail(int id) {
+    // assert id < MAX_ENTITIES
+    s_entity_masks[id] |= COMP_SAIL;
+    return &s_sails[id];
+}
+
+c_ship_motion_t* ecs_add_ship_motion(int id) {
+    // assert id < MAX_ENTITIES
+    s_entity_masks[id] |= COMP_SHIP_MOTION;
+    return &s_ship_motions[id];
+}
+
 void ecs_add_player_controlled(int id) {
     // assert id < MAX_ENTITIES
     s_entity_masks[id] |= COMP_PLAYER_CONTROLLED;
@@ -70,6 +84,14 @@ const c_sprite_t* ecs_get_sprite_const(int id) {
     return &s_sprites[id];
 }
 
+const c_sail_t* ecs_get_sail_const(int id) {
+    return &s_sails[id];
+}
+
+const c_ship_motion_t* ecs_get_ship_motion_const(int id) {
+    return &s_ship_motions[id];
+}
+
 const c_ship_input_t* ecs_get_ship_input_const(int id) {
     return &s_ship_inputs[id];
 }
@@ -84,6 +106,14 @@ c_transform_t* ecs_get_transforms_array(void) {
 
 c_sprite_t* ecs_get_sprites_array(void) {
     return s_sprites;
+}
+
+c_sail_t* ecs_get_sails_array(void) {
+    return s_sails;
+}
+
+c_ship_motion_t* ecs_get_ship_motions_array(void) {
+    return s_ship_motions;
 }
 
 c_ship_input_t* ecs_get_ship_inputs_array(void) {
